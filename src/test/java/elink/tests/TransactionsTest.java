@@ -5,7 +5,9 @@ import elink.config.TestConfig;
 import io.restassured.response.Response;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
 import static org.assertj.core.api.Assertions.assertThat;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -14,21 +16,25 @@ public class TransactionsTest extends BaseApiTest {
     private final Logger LOGGER = LogManager.getLogger(this.getClass());
 
     private static final String CCY = "EUR";
-    private static final String DATE_FROM = "2026-08-01";
-    private static final String DATE_TILL = "2026-08-31";
+    private static final String DATE_FROM = "2026-09-01";
+    private static final String DATE_TILL = "2026-09-26";
 
     @Test
     void transactionsCheckForActiveTicketAndValidDates() {
-        LOGGER.info("This test check successfull response for 'Transactions' function with valid data");
-        Response response = elinkClientRequester.transactions(TestConfig.get("ticket.active"),CCY,DATE_FROM,DATE_TILL,"EN",null);
+        LOGGER.info("This test check successfull response for 'Transactions' function with all valid data");
+        Response response = elinkClientRequester.transactions(TestConfig.get("ticket.active"), CCY, DATE_FROM, DATE_TILL, "EN", null);
         assertThat(jsonCode(response)).isEqualTo("0");
+        assertThat(response.jsonPath().getList("transactions")).isNotEmpty();
+        assertThat(response.jsonPath().getString("transactions[0].currency")).hasSize(3);
+        assertThat(response.jsonPath().getString("error")).isEqualTo("");
     }
 
     @Test
     void transactionsCheckForOmittedCurrency() {
         LOGGER.info("This test check successfull response for 'Transactions' function when no currency added to request");
-        Response response = elinkClientRequester.transactions(TestConfig.get("ticket.active"),null,DATE_FROM,DATE_TILL,"EN", null);
+        Response response = elinkClientRequester.transactions(TestConfig.get("ticket.active"), null, DATE_FROM, DATE_TILL, "EN", null);
         assertThat(jsonCode(response)).isEqualTo("0");
+        assertThat(response.jsonPath().getString("error")).isEqualTo("");
     }
 
 
@@ -36,8 +42,9 @@ public class TransactionsTest extends BaseApiTest {
     @ValueSource(strings = {"EN", "RU", "LV"})
     void transactionCheckForLanguage(String language) {
         LOGGER.info("This test check successful response  for 'Transactions' function for all allowed languages");
-        Response response = elinkClientRequester.transactions(TestConfig.get("ticket.active"),CCY,DATE_FROM,DATE_TILL,language, null);
+        Response response = elinkClientRequester.transactions(TestConfig.get("ticket.active"), CCY, DATE_FROM, DATE_TILL, language, null);
         assertThat(jsonCode(response)).isEqualTo("0");
+        assertThat(response.jsonPath().getString("error")).isEqualTo("");
     }
 
     @Test
@@ -45,6 +52,7 @@ public class TransactionsTest extends BaseApiTest {
         LOGGER.info("This test check negative scenario 'missing required fields' for 'Transactions' function: no ticket added");
         Response response = elinkClientRequester.transactions(null, CCY, DATE_FROM, DATE_TILL, "EN", null);
         assertThat(jsonCode(response)).isEqualTo("4");
+        assertThat(response.jsonPath().getString("error")).isEqualTo("ticket");
     }
 
     @Test
@@ -53,6 +61,7 @@ public class TransactionsTest extends BaseApiTest {
         Response response = elinkClientRequester.transactions(
                 TestConfig.get("ticket.active"), CCY, null, DATE_TILL, "EN", null);
         assertThat(jsonCode(response)).isEqualTo("4");
+        assertThat(response.jsonPath().getString("error")).isEqualTo("dateFrom");
     }
 
     @Test
@@ -61,6 +70,7 @@ public class TransactionsTest extends BaseApiTest {
         Response response = elinkClientRequester.transactions(
                 TestConfig.get("ticket.active"), CCY, DATE_FROM, null, "EN", null);
         assertThat(jsonCode(response)).isEqualTo("4");
+        assertThat(response.jsonPath().getString("error")).isEqualTo("dateTill");
     }
 
     @Test
@@ -69,6 +79,7 @@ public class TransactionsTest extends BaseApiTest {
         Response response = elinkClientRequester.transactions(
                 TestConfig.get("ticket.inactive"), CCY, DATE_FROM, DATE_TILL, "EN", null);
         assertThat(jsonCode(response)).isEqualTo("6");
+        assertThat(response.jsonPath().getString("error")).isEqualTo("Invalid or inactive ticket.");
     }
 
     @Test
@@ -77,6 +88,7 @@ public class TransactionsTest extends BaseApiTest {
         Response response = elinkClientRequester.transactions(
                 "not-a-real-ticket-12345", CCY, DATE_FROM, DATE_TILL, "EN", null);
         assertThat(jsonCode(response)).isEqualTo("6");
+        assertThat(response.jsonPath().getString("error")).isEqualTo("Invalid or inactive ticket.");
     }
 
     @Test
@@ -85,6 +97,7 @@ public class TransactionsTest extends BaseApiTest {
         Response response = elinkClientRequester.transactions(
                 TestConfig.get("ticket.active"), CCY, "01-01-2024", DATE_TILL, "EN", null);
         assertThat(jsonCode(response)).isEqualTo("4");
+        assertThat(response.jsonPath().getString("error")).isEqualTo("dateFrom");
     }
 
     @Test
@@ -93,6 +106,7 @@ public class TransactionsTest extends BaseApiTest {
         Response response = elinkClientRequester.transactions(
                 TestConfig.get("ticket.active"), "EURO", DATE_FROM, DATE_TILL, "EN", null);
         assertThat(jsonCode(response)).isEqualTo("4");
+        assertThat(response.jsonPath().getString("error")).isEqualTo("ccy");
     }
 
     @Test
@@ -104,6 +118,7 @@ public class TransactionsTest extends BaseApiTest {
         Response response = elinkClientRequester.transactions(
                 TestConfig.get("ticket.active"), CCY, DATE_TILL, DATE_FROM, "EN", null);
         assertThat(jsonCode(response)).isEqualTo("0");
+        assertThat(response.jsonPath().getString("error")).isEqualTo("");
     }
 
     @Test
@@ -115,6 +130,7 @@ public class TransactionsTest extends BaseApiTest {
         Response response = elinkClientRequester.transactions(
                 TestConfig.get("ticket.active"), CCY, DATE_FROM, DATE_TILL, "LT", null);
         assertThat(jsonCode(response)).isEqualTo("0");
+        assertThat(response.jsonPath().getString("error")).isEqualTo("");
     }
 
 
