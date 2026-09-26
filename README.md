@@ -1,0 +1,1 @@
+config.properties and the test certificate (certs/068774.p12) are committed intentionally — both are sandbox-only test credentials provided for this task (not real secrets), so the project runs out of the box for review without any manual setup 
