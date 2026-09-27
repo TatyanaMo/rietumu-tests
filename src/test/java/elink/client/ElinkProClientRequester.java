@@ -20,7 +20,6 @@ import java.security.Principal;
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
 
-import static io.restassured.RestAssured.enableLoggingOfRequestAndResponseIfValidationFails;
 import static io.restassured.RestAssured.given;
 
 public class ElinkProClientRequester {
@@ -49,6 +48,16 @@ public class ElinkProClientRequester {
         if (ticket != null) request.formParam("ticket", ticket);
         if (language != null) request.formParam("language", language);
         if (refNo != null) request.formParam("refNo", refNo);
+        return request.post(baseUrl);
+    }
+
+    public Response postSignedDocument(String ticket, String language, String refNo, String doc) {
+        RequestSpecification request = given().config(sslConfig)
+                .formParam("function","PostSignedDocument");
+        if (ticket != null) request.formParam("ticket", ticket);
+        if (language != null) request.formParam("language", language);
+        if (refNo != null) request.formParam("refNo", refNo);
+        if (doc != null) request.formParam("doc", doc);
         return request.post(baseUrl);
     }
 

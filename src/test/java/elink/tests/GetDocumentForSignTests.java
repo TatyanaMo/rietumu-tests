@@ -20,8 +20,8 @@ public class GetDocumentForSignTests extends BaseApiTest {
     @BeforeAll
     static void registerDocumentAndFetchRefNo() {
         String initialDoc =loadDocument("docs/postDocumentRequest.xml");
-        Response response = elinkProClientRequester.postDocument(TestConfig.get("ticket.active"), "EN", initialDoc);
-        refNo = response.jsonPath().getString("refNo");
+        Response postDocResponse = elinkProClientRequester.postDocument(TestConfig.get("ticket.active"), "EN", initialDoc);
+        refNo = postDocResponse.jsonPath().getString("refNo");
     }
 
     @Test
@@ -39,7 +39,7 @@ public class GetDocumentForSignTests extends BaseApiTest {
 
     @ParameterizedTest(name = "transactionCheckForLanguage_{0}")
     @ValueSource(strings = {"EN", "RU", "LV"})
-    void transactionCheckForLanguage(String language) {
+    void getDocumentForSignCheckForLanguage(String language) {
         LOGGER.info("This test check successful response  for 'GetDocumentForSign' function for all allowed languages");
         Response response = elinkProClientRequester.getDocumentForSign(TestConfig.get("ticket.active"), language, refNo);
         assertThat(response.jsonPath().getString("code")).isEqualTo("0");
@@ -49,6 +49,20 @@ public class GetDocumentForSignTests extends BaseApiTest {
         assertThat(response.jsonPath().getString("status")).isEqualTo("20");
         assertThat(response.jsonPath().getString("state")).isEqualTo("Waiting for signature");
     }
+
+    @Test
+    void getDocumentForSignCheckForOmittedLanguage() {
+        LOGGER.info("This test check successful response for 'GetDocumentForSign' function when language not added");
+        Response response = elinkProClientRequester.getDocumentForSign(TestConfig.get("ticket.active"), "XXX", refNo);
+
+        assertThat(response.jsonPath().getString("code")).isEqualTo("0");
+        assertThat(response.jsonPath().getList("signatureRequired", String.class)).contains("CER");
+        assertThat(response.jsonPath().getString("doc")).contains("<RBdocument");
+        assertThat(response.jsonPath().getString("doc")).contains(refNo);
+        assertThat(response.jsonPath().getString("status")).isEqualTo("20");
+        assertThat(response.jsonPath().getString("state")).isEqualTo("Waiting for signature");
+    }
+
 
     @Test
     void getDocumentForSignCheckForInvalidLanguage() {

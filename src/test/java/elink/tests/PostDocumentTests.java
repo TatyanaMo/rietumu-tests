@@ -29,7 +29,7 @@ public class PostDocumentTests extends BaseApiTest {
 
     @ParameterizedTest(name = "transactionCheckForLanguage_{0}")
     @ValueSource(strings = {"EN", "RU", "LV"})
-    void transactionCheckForLanguage(String language) {
+    void postDocumentCheckForLanguage(String language) {
         LOGGER.info("This test check successful response  for 'PostDocument' function for all allowed languages");
         String doc = loadDocument("docs/postDocumentRequest.xml");
         Response response = elinkProClientRequester.postDocument(
@@ -41,7 +41,7 @@ public class PostDocumentTests extends BaseApiTest {
 
     @Test
     void postDocumentCheckForOmittedLanguage() {
-        LOGGER.info("This test check negative scenario for 'PostDocument' function when no language added");
+        LOGGER.info("This test check successful response for 'PostDocument' function when no language added");
         String doc = loadDocument("docs/postDocumentRequest.xml");
         Response response = elinkProClientRequester.postDocument(
                 TestConfig.get("ticket.active"), null, doc);
@@ -56,7 +56,7 @@ public class PostDocumentTests extends BaseApiTest {
          /* Sandbox behavior: language is not validated against the documented set (EN/RU/LV).
          An unsupported value like LT is accepted (code 0) and returns English text (not rejected or translated).
           */
-        LOGGER.info("This test check negative scenario 'invalid values' for 'PostDocument' function: unsupported language");
+        LOGGER.info("This test check negative scenario 'invalid values' for 'PostDocument' function with language not supported");
         String doc = loadDocument("docs/postDocumentRequest.xml");
         Response response = elinkProClientRequester.postDocument(
                 TestConfig.get("ticket.active"), "LT", doc);

@@ -132,7 +132,5 @@ public class TransactionsTest extends BaseApiTest {
         assertThat(jsonCode(response)).isEqualTo("0");
         assertThat(response.jsonPath().getString("error")).isEqualTo("");
     }
-
-
 }
 
