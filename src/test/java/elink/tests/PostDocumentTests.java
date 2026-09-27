@@ -6,6 +6,8 @@ import io.restassured.response.Response;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -14,14 +16,117 @@ public class PostDocumentTests extends BaseApiTest {
 
     @Test
     void postDocumentCheckForValidDocument() {
-        LOGGER.info("This test check successfull response for 'PostDocument' function with all valid data");
+        LOGGER.info("This test check successful response for 'PostDocument' function with all valid data");
         String initialDoc = loadDocument("docs/postDocumentRequest.xml");
         Response response = elinkProClientRequester.postDocument(TestConfig.get("ticket.active"),"EN", initialDoc);
 
         assertThat(response.jsonPath().getString("code")).isEqualTo("0");
         assertThat(response.jsonPath().getString("refNo")).isNotEmpty();
         assertThat(response.jsonPath().getList("signatureRequired", String.class)).contains("CER");
+        assertThat(response.jsonPath().getString("error")).isEqualTo("");
         assertThat(response.jsonPath().getString("error_code")).isEqualTo("IERR_OK");
     }
 
+    @ParameterizedTest(name = "transactionCheckForLanguage_{0}")
+    @ValueSource(strings = {"EN", "RU", "LV"})
+    void transactionCheckForLanguage(String language) {
+        LOGGER.info("This test check successful response  for 'PostDocument' function for all allowed languages");
+        String doc = loadDocument("docs/postDocumentRequest.xml");
+        Response response = elinkProClientRequester.postDocument(
+                TestConfig.get("ticket.active"), language, doc);
+        assertThat(jsonCode(response)).isEqualTo("0");
+        assertThat(response.jsonPath().getString("error")).isEqualTo("");
+        assertThat(response.jsonPath().getString("error_code")).isEqualTo("IERR_OK");
+    }
+
+    @Test
+    void postDocumentCheckForOmittedLanguage() {
+        LOGGER.info("This test check negative scenario for 'PostDocument' function when no language added");
+        String doc = loadDocument("docs/postDocumentRequest.xml");
+        Response response = elinkProClientRequester.postDocument(
+                TestConfig.get("ticket.active"), null, doc);
+
+        assertThat(response.jsonPath().getString("code")).isEqualTo("0");
+        assertThat(response.jsonPath().getString("error")).isEqualTo("");
+        assertThat(response.jsonPath().getString("error_code")).isEqualTo("IERR_OK");
+    }
+
+    @Test
+    void transactionsCheckForNotSupportiveLanguage() {
+         /* Sandbox behavior: language is not validated against the documented set (EN/RU/LV).
+         An unsupported value like LT is accepted (code 0) and returns English text (not rejected or translated).
+          */
+        LOGGER.info("This test check negative scenario 'invalid values' for 'PostDocument' function: unsupported language");
+        String doc = loadDocument("docs/postDocumentRequest.xml");
+        Response response = elinkProClientRequester.postDocument(
+                TestConfig.get("ticket.active"), "LT", doc);
+
+        assertThat(response.jsonPath().getString("code")).isEqualTo("0");
+        assertThat(response.jsonPath().getString("error")).isEqualTo("");
+        assertThat(response.jsonPath().getString("error_code")).isEqualTo("IERR_OK");
+    }
+
+    @Test
+    void postDocumentCheckForInvalidLanguage() {
+        LOGGER.info("This test check negative scenario for 'PostDocument' function with not valid language");
+        String doc = loadDocument("docs/postDocumentRequest.xml");
+        Response response = elinkProClientRequester.postDocument(TestConfig.get("ticket.active"), "XXX", doc);
+
+        assertThat(response.jsonPath().getString("code")).isEqualTo("4");
+        assertThat(response.jsonPath().getString("error")).isEqualTo("language");
+    }
+
+
+    @Test
+    void postDocumentCheckForMissingTicket() {
+        LOGGER.info("This test check negative scenario for 'PostDocument' function when ticket missed");
+        String doc = loadDocument("docs/postDocumentRequest.xml");
+        Response response = elinkProClientRequester.postDocument(null, "EN", doc);
+
+        assertThat(response.jsonPath().getString("code")).isEqualTo("4");
+        assertThat(response.jsonPath().getString("error")).isEqualTo("ticket");
+    }
+
+    @Test
+    void postDocumentCheckForInactiveTicket() {
+        LOGGER.info("This test check negative scenario for 'PostDocument' function when ticket inactive");
+        String doc = loadDocument("docs/postDocumentRequest.xml");
+        Response response = elinkProClientRequester.postDocument(TestConfig.get("ticket.inactive"), "EN", doc);
+
+        assertThat(response.jsonPath().getString("code")).isEqualTo("6");
+        assertThat(response.jsonPath().getString("error")).isEqualTo("Invalid or inactive ticket.");
+    }
+
+    @Test
+    void postDocumentCheckForInvalidTicket() {
+        LOGGER.info("This test check negative scenario for 'PostDocument' function when ticket invalid");
+        String doc = loadDocument("docs/postDocumentRequest.xml");
+        Response response = elinkProClientRequester.postDocument("not-valid-ticket-1234", "EN", doc);
+
+        assertThat(response.jsonPath().getString("code")).isEqualTo("6");
+        assertThat(response.jsonPath().getString("error")).isEqualTo("Invalid or inactive ticket.");
+    }
+
+    @Test
+    void postDocumentCheckForMissingDoc() {
+        LOGGER.info("This test check negative scenario for 'PostDocument' function when doc missed");
+        Response response = elinkProClientRequester.postDocument(
+                TestConfig.get("ticket.active"), "EN",null);
+
+        assertThat(response.jsonPath().getString("code")).isEqualTo("4");
+        assertThat(response.jsonPath().getString("error")).isEqualTo("doc");
+    }
+
+    @Test
+    void postDocumentCheckForInvalidDoc() {
+        /*
+        Sandbox behavior: for invalid ticker returns error code '6', but with comment 'Invalid or inactive ticket.', not 'doc'.
+         */
+        LOGGER.info("This test check negative scenario for 'PostDocument' function when doc invalid");
+        Response response = elinkProClientRequester.postDocument(
+                TestConfig.get("ticket.active"), "EN","not-doc-12345333");
+
+        assertThat(response.jsonPath().getString("code")).isEqualTo("6");
+        assertThat(response.jsonPath().getString("error")).isEqualTo("Invalid or inactive ticket.");
+    }
 }

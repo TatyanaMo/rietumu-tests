@@ -20,8 +20,8 @@ public class TransactionsTest extends BaseApiTest {
     private static final String DATE_TILL = "2026-09-26";
 
     @Test
-    void transactionsCheckForActiveTicketAndValidDates() {
-        LOGGER.info("This test check successfull response for 'Transactions' function with all valid data");
+    void transactionsCheckForAllValidData() {
+        LOGGER.info("This test check successful response for 'Transactions' function with all valid data");
         Response response = elinkClientRequester.transactions(TestConfig.get("ticket.active"), CCY, DATE_FROM, DATE_TILL, "EN", null);
         assertThat(jsonCode(response)).isEqualTo("0");
         assertThat(response.jsonPath().getList("transactions")).isNotEmpty();
@@ -31,7 +31,7 @@ public class TransactionsTest extends BaseApiTest {
 
     @Test
     void transactionsCheckForOmittedCurrency() {
-        LOGGER.info("This test check successfull response for 'Transactions' function when no currency added to request");
+        LOGGER.info("This test check successful response for 'Transactions' function when currency null");
         Response response = elinkClientRequester.transactions(TestConfig.get("ticket.active"), null, DATE_FROM, DATE_TILL, "EN", null);
         assertThat(jsonCode(response)).isEqualTo("0");
         assertThat(response.jsonPath().getString("error")).isEqualTo("");
@@ -49,7 +49,7 @@ public class TransactionsTest extends BaseApiTest {
 
     @Test
     void transactionsCheckForMissingTicket() {
-        LOGGER.info("This test check negative scenario 'missing required fields' for 'Transactions' function: no ticket added");
+        LOGGER.info("This test check negative scenario for 'Transactions' function when ticket missed");
         Response response = elinkClientRequester.transactions(null, CCY, DATE_FROM, DATE_TILL, "EN", null);
         assertThat(jsonCode(response)).isEqualTo("4");
         assertThat(response.jsonPath().getString("error")).isEqualTo("ticket");
@@ -57,7 +57,7 @@ public class TransactionsTest extends BaseApiTest {
 
     @Test
     void transactionsCheckForMissingDateFrom() {
-        LOGGER.info("This test check negative scenario 'missing required fields' for 'Transactions' function: no 'date from' added");
+        LOGGER.info("This test check negative scenario for 'Transactions' function when 'date from' missed");
         Response response = elinkClientRequester.transactions(
                 TestConfig.get("ticket.active"), CCY, null, DATE_TILL, "EN", null);
         assertThat(jsonCode(response)).isEqualTo("4");
@@ -66,7 +66,7 @@ public class TransactionsTest extends BaseApiTest {
 
     @Test
     void transactionsCheckForMissingDateTill() {
-        LOGGER.info("This test check negative scenario 'missing required fields' for 'Transactions' function: no 'date till' added");
+        LOGGER.info("This test check negative scenario for 'Transactions' function when 'date till' missed");
         Response response = elinkClientRequester.transactions(
                 TestConfig.get("ticket.active"), CCY, DATE_FROM, null, "EN", null);
         assertThat(jsonCode(response)).isEqualTo("4");
@@ -75,7 +75,7 @@ public class TransactionsTest extends BaseApiTest {
 
     @Test
     void transactionsCheckForInactiveTicket() {
-        LOGGER.info("This test check negative scenario 'invalid values' for 'Transactions' function: inactive ticket");
+        LOGGER.info("This test check negative scenario for 'Transactions' function when ticket inactive");
         Response response = elinkClientRequester.transactions(
                 TestConfig.get("ticket.inactive"), CCY, DATE_FROM, DATE_TILL, "EN", null);
         assertThat(jsonCode(response)).isEqualTo("6");
@@ -84,7 +84,7 @@ public class TransactionsTest extends BaseApiTest {
 
     @Test
     void transactionsCheckForInvalidTicket() {
-        LOGGER.info("This test check negative scenario 'invalid values' for 'Transactions' function: invalid ticket");
+        LOGGER.info("This test check negative scenario for 'Transactions' function when ticket invalid");
         Response response = elinkClientRequester.transactions(
                 "not-a-real-ticket-12345", CCY, DATE_FROM, DATE_TILL, "EN", null);
         assertThat(jsonCode(response)).isEqualTo("6");
@@ -93,7 +93,7 @@ public class TransactionsTest extends BaseApiTest {
 
     @Test
     void transactionsCheckForInvalidDateFormat() {
-        LOGGER.info("This test check negative scenario 'invalid values' for 'Transactions' function: invalid date format");
+        LOGGER.info("This test check negative scenario for 'Transactions' function when date format invalid");
         Response response = elinkClientRequester.transactions(
                 TestConfig.get("ticket.active"), CCY, "01-01-2024", DATE_TILL, "EN", null);
         assertThat(jsonCode(response)).isEqualTo("4");
@@ -102,7 +102,7 @@ public class TransactionsTest extends BaseApiTest {
 
     @Test
     void transactionsCheckForInvalidCcyFormat() {
-        LOGGER.info("This test check negative scenario 'invalid values' for 'Transactions' function: invalid currency format");
+        LOGGER.info("This test check negative scenario for 'Transactions' function when currency invalid");
         Response response = elinkClientRequester.transactions(
                 TestConfig.get("ticket.active"), "EURO", DATE_FROM, DATE_TILL, "EN", null);
         assertThat(jsonCode(response)).isEqualTo("4");
@@ -114,7 +114,7 @@ public class TransactionsTest extends BaseApiTest {
          /* Sandbox behavior: dateFrom/dateTill ordering is not validated.
          An inverted range (dateFrom after dateTill) still returns code 0 and the fixed dataset rather (not an error).
           */
-        LOGGER.info("This test check negative scenario 'invalid values' for 'Transactions' function: incorrect order for date period");
+        LOGGER.info("This test check negative scenario for 'Transactions' function when order for date period incorrect");
         Response response = elinkClientRequester.transactions(
                 TestConfig.get("ticket.active"), CCY, DATE_TILL, DATE_FROM, "EN", null);
         assertThat(jsonCode(response)).isEqualTo("0");
@@ -126,7 +126,7 @@ public class TransactionsTest extends BaseApiTest {
          /* Sandbox behavior: language is not validated against the documented set (EN/RU/LV).
          An unsupported value like LT is accepted (code 0) and returns English text (not rejected or translated).
           */
-        LOGGER.info("This test check negative scenario 'invalid values' for 'Transactions' function: unsupported language");
+        LOGGER.info("This test check negative scenario for 'Transactions' function when language unsupported");
         Response response = elinkClientRequester.transactions(
                 TestConfig.get("ticket.active"), CCY, DATE_FROM, DATE_TILL, "LT", null);
         assertThat(jsonCode(response)).isEqualTo("0");

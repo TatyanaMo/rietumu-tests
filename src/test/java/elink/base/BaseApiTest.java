@@ -23,8 +23,8 @@ public abstract class BaseApiTest {
         return response.jsonPath().getString("code");
     }
 
-    protected String loadDocument(String path) {
-        try (InputStream is = getClass().getClassLoader().getResourceAsStream(path)) {
+    protected static String loadDocument(String path) {
+        try (InputStream is = BaseApiTest.class.getClassLoader().getResourceAsStream(path)) {
             if (is == null) {
                 throw new RuntimeException("Document not found on classpath: " + path);
             }

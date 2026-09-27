@@ -5,6 +5,8 @@ import io.restassured.config.RestAssuredConfig;
 import io.restassured.config.SSLConfig;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
@@ -18,9 +20,12 @@ import java.security.Principal;
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
 
+import static io.restassured.RestAssured.enableLoggingOfRequestAndResponseIfValidationFails;
 import static io.restassured.RestAssured.given;
 
 public class ElinkProClientRequester {
+    private final Logger LOGGER = LogManager.getLogger(this.getClass());
+
     private final String baseUrl;
     private final RestAssuredConfig sslConfig;
 
@@ -29,7 +34,26 @@ public class ElinkProClientRequester {
         this.sslConfig = RestAssuredConfig.config().sslConfig(buildForcedCertSslConfig());
     }
 
+    public Response postDocument(String ticket, String language, String doc) {
+        RequestSpecification req = given().config(sslConfig)
+                .formParam("function", "PostDocument");
+        if (ticket != null) req.formParam("ticket", ticket);
+        if (language != null) req.formParam("language", language);
+        if (doc != null) req.formParam("doc", doc);
+        return req.post(baseUrl);
+    }
+
+    public Response getDocumentForSign(String ticket, String language, String refNo) {
+        RequestSpecification request = given().config(sslConfig)
+                .formParam("function", "GetDocumentForSign");
+        if (ticket != null) request.formParam("ticket", ticket);
+        if (language != null) request.formParam("language", language);
+        if (refNo != null) request.formParam("refNo", refNo);
+        return request.post(baseUrl);
+    }
+
     private SSLConfig buildForcedCertSslConfig() {
+        LOGGER.info("Adding certificate for authorization (elink pro account)");
         try {
             String certPath = TestConfig.get("certPath");
             String certPassword = TestConfig.get("certPassword");
@@ -82,15 +106,6 @@ public class ElinkProClientRequester {
         } catch (Exception e) {
             throw new RuntimeException("Failed to build client-certificate SSL config", e);
         }
-    }
-
-    public Response postDocument(String ticket, String language, String doc) {
-        RequestSpecification req = given().config(sslConfig)
-                .formParam("function", "PostDocument");
-        if (ticket != null) req.formParam("ticket", ticket);
-        if (language != null) req.formParam("language", language);
-        if (doc != null) req.formParam("doc", doc);
-        return req.post(baseUrl);
     }
 }
 

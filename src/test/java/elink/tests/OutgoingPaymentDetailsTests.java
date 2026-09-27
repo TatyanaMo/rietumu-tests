@@ -23,8 +23,8 @@ public class OutgoingPaymentDetailsTests extends BaseApiTest {
     }
 
     @Test
-    void outgoingPaymentDetailsCheckForActiveTicketAndValidRefno() {
-        LOGGER.info("This test check successfull response for 'OutgoingPaymentDetails' function with all valid data");
+    void outgoingPaymentDetailsCheckForAllValidData() {
+        LOGGER.info("This test check successful response for 'OutgoingPaymentDetails' function with all valid data");
         Response response = elinkClientRequester.outgoingPaymentDetails(TestConfig.get("ticket.active"), refno, "EN");
         assertThat(jsonCode(response)).isEqualTo("0");
         assertThat(response.jsonPath().getString("error")).isEqualTo("");
@@ -43,7 +43,7 @@ public class OutgoingPaymentDetailsTests extends BaseApiTest {
     @ParameterizedTest(name = "outgoingPaymentDetailsCheckForLanguage_{0}")
     @ValueSource(strings = {"EN", "RU", "LV"})
     void outgoingPaymentDetailsCheckForLanguage(String language) {
-        LOGGER.info("This test check successfull response for 'OutgoingPaymentDetails' function for all allowed languages");
+        LOGGER.info("This test check successful response for 'OutgoingPaymentDetails' function for all allowed languages");
         Response response = elinkClientRequester.outgoingPaymentDetails(
                 TestConfig.get("ticket.active"), refno, language);
         assertThat(jsonCode(response)).isEqualTo("0");
@@ -52,7 +52,7 @@ public class OutgoingPaymentDetailsTests extends BaseApiTest {
 
     @Test
     void outgoingPaymentDetailsCheckWithoutLanguage() {
-        LOGGER.info("This test check successfull response for 'OutgoingPaymentDetails' function: without language added");
+        LOGGER.info("This test check successful response for 'OutgoingPaymentDetails' function: without language added");
         Response response = elinkClientRequester.outgoingPaymentDetails(
                 TestConfig.get("ticket.active"), refno, null);
         assertThat(jsonCode(response)).isEqualTo("0");
@@ -61,7 +61,7 @@ public class OutgoingPaymentDetailsTests extends BaseApiTest {
 
     @Test
     void outgoingPaymentDetailsCheckForMissingTicket() {
-        LOGGER.info("This test check negative scenario 'missing required fields' for 'OutgoingPaymentDetails' function: no ticket added");
+        LOGGER.info("This test check negative scenario for 'OutgoingPaymentDetails' function when ticket missed");
         Response response = elinkClientRequester.outgoingPaymentDetails(null, refno, "EN");
         assertThat(jsonCode(response)).isEqualTo("4");
         assertThat(response.jsonPath().getString("error")).isEqualTo("ticket");
@@ -70,7 +70,7 @@ public class OutgoingPaymentDetailsTests extends BaseApiTest {
 
     @Test
     void outgoingPaymentDetailsCheckForMissingRefno() {
-        LOGGER.info("This test check negative scenario 'missing required fields' for 'OutgoingPaymentDetails' function: no refno added");
+        LOGGER.info("This test check negative scenario for 'OutgoingPaymentDetails' function when refno missed");
         Response response = elinkClientRequester.outgoingPaymentDetails(
                 TestConfig.get("ticket.active"), null, "EN");
         assertThat(jsonCode(response)).isEqualTo("4");
@@ -80,7 +80,7 @@ public class OutgoingPaymentDetailsTests extends BaseApiTest {
 
     @Test
     void outgoingPaymentDetailsCheckForInactiveTicket() {
-        LOGGER.info("This test check negative scenario 'invalid values' for 'OutgoingPaymentDetails' function: inactive ticket");
+        LOGGER.info("This test check negative scenario for 'OutgoingPaymentDetails' function when ticket inactive");
         Response response = elinkClientRequester.outgoingPaymentDetails(
                 TestConfig.get("ticket.inactive"), refno, "EN");
         assertThat(jsonCode(response)).isEqualTo("6");
@@ -90,7 +90,7 @@ public class OutgoingPaymentDetailsTests extends BaseApiTest {
 
     @Test
     void outgoingPaymentDetailsCheckForInvalidTicket() {
-        LOGGER.info("This test check negative scenario 'invalid values' for 'OutgoingPaymentDetails' function: invalid ticket");
+        LOGGER.info("This test check negative scenario for 'OutgoingPaymentDetails' function when ticket invalid");
         Response response = elinkClientRequester.outgoingPaymentDetails(
                 "not-a-real-ticket-12345", refno, "EN");
         assertThat(jsonCode(response)).isEqualTo("6");
@@ -99,8 +99,8 @@ public class OutgoingPaymentDetailsTests extends BaseApiTest {
     }
 
     @Test
-    void outgoingPaymentDetailsCheckForNonexistentRefno() {
-        LOGGER.info("This test check negative scenario 'invalid values' for 'OutgoingPaymentDetails' function: non-existing refno");
+    void outgoingPaymentDetailsCheckForInvalidRefno() {
+        LOGGER.info("This test check negative scenario for 'OutgoingPaymentDetails' function when refno invalid");
         Response response = elinkClientRequester.outgoingPaymentDetails(
                 TestConfig.get("ticket.active"), "NONEXISTENT-REFNO-999", "EN");
         assertThat(jsonCode(response)).isEqualTo("4");
