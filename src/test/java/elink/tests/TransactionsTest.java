@@ -53,6 +53,16 @@ public class TransactionsTest extends BaseApiTest {
     }
 
     @Test
+    void transactionsCheckForAllValidData() {
+        LOGGER.info("This test check successful response for 'Transactions' function with all valid data");
+        Response response = elinkClientRequester.transactions(TestConfig.get("ticket.active"), CCY, DATE_FROM, DATE_TILL, "EN", null);
+        assertThat(jsonCode(response)).isEqualTo("0");
+        assertThat(response.jsonPath().getList("transactions")).isNotEmpty();
+        assertThat(response.jsonPath().getString("transactions[0].currency")).hasSize(3);
+        assertThat(response.jsonPath().getString("error")).isEqualTo("");
+    }
+
+    @Test
     void transactionsCheckForOmittedCurrency() {
         LOGGER.info("This test check successful response for 'Transactions' function when currency null");
         Response response = elinkClientRequester.transactions(TestConfig.get("ticket.active"), null, DATE_FROM, DATE_TILL, "EN", null);

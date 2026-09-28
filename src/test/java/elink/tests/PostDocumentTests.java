@@ -37,6 +37,18 @@ public class PostDocumentTests extends BaseApiTest {
         });
     }
 
+    @Test
+    void postDocumentCheckForValidDocument() {
+        LOGGER.info("This test check successful response for 'PostDocument' function with all valid data");
+        String initialDoc = loadDocument("docs/postDocumentRequest.xml");
+        Response response = elinkProClientRequester.postDocument(TestConfig.get("ticket.active"), "EN", initialDoc);
+
+        assertThat(response.jsonPath().getString("code")).isEqualTo("0");
+        assertThat(response.jsonPath().getString("refNo")).isNotEmpty();
+        assertThat(response.jsonPath().getList("signatureRequired", String.class)).contains("CER");
+        assertThat(response.jsonPath().getString("error")).isEqualTo("");
+        assertThat(response.jsonPath().getString("error_code")).isEqualTo("IERR_OK");
+    }
 
     @ParameterizedTest(name = "transactionCheckForLanguage_{0}")
     @ValueSource(strings = {"EN", "RU", "LV"})
