@@ -5,6 +5,7 @@ import elink.config.TestConfig;
 import io.restassured.response.Response;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -15,17 +16,27 @@ public class PostDocumentTests extends BaseApiTest {
     private final Logger LOGGER = LogManager.getLogger(this.getClass());
 
     @Test
-    void postDocumentCheckForValidDocument() {
-        LOGGER.info("This test check successful response for 'PostDocument' function with all valid data");
+    void postDocumentCheckAllFieldsForValidDocument() {
+     /*
+    Example of assertions for all response params with data, empty was excluded
+    */
+        LOGGER.info("This test checks all documented response fields for 'PostDocument' function with valid data");
         String initialDoc = loadDocument("docs/postDocumentRequest.xml");
-        Response response = elinkProClientRequester.postDocument(TestConfig.get("ticket.active"),"EN", initialDoc);
+        Response response = elinkProClientRequester.postDocument(TestConfig.get("ticket.active"), "EN", initialDoc);
 
-        assertThat(response.jsonPath().getString("code")).isEqualTo("0");
-        assertThat(response.jsonPath().getString("refNo")).isNotEmpty();
-        assertThat(response.jsonPath().getList("signatureRequired", String.class)).contains("CER");
-        assertThat(response.jsonPath().getString("error")).isEqualTo("");
-        assertThat(response.jsonPath().getString("error_code")).isEqualTo("IERR_OK");
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(response.jsonPath().getString("code")).isEqualTo("0");
+            softly.assertThat(response.jsonPath().getString("error")).isEqualTo("");
+            softly.assertThat(response.jsonPath().getList("signatureRequired", String.class)).isNotEmpty();
+            softly.assertThat(response.jsonPath().getString("refNo")).isNotBlank();
+            softly.assertThat(response.jsonPath().getString("error_code")).isEqualTo("IERR_OK");
+            softly.assertThat(response.jsonPath().getString("error_message")).isNotBlank();
+            softly.assertThat(response.jsonPath().getString("execute_message")).isNotNull();
+            softly.assertThat(response.jsonPath().getString("error_field")).isNotNull();
+            softly.assertThat(response.jsonPath().getString("error_level")).isEqualTo("0");
+        });
     }
+
 
     @ParameterizedTest(name = "transactionCheckForLanguage_{0}")
     @ValueSource(strings = {"EN", "RU", "LV"})

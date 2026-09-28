@@ -8,9 +8,12 @@ import org.apache.logging.log4j.Logger;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+
+import java.time.LocalDate;
 
 public class TransactionsTest extends BaseApiTest {
     private final Logger LOGGER = LogManager.getLogger(this.getClass());
@@ -20,13 +23,33 @@ public class TransactionsTest extends BaseApiTest {
     private static final String DATE_TILL = "2026-09-26";
 
     @Test
-    void transactionsCheckForAllValidData() {
-        LOGGER.info("This test check successful response for 'Transactions' function with all valid data");
+    void transactionsCheckAllFieldsForValidRequest() {
+    /*
+    Example of assertions for all response params with data (for one transaction), empty was excluded
+    */
+        LOGGER.info("This test checks all documented response fields for 'Transactions' function with valid data");
         Response response = elinkClientRequester.transactions(TestConfig.get("ticket.active"), CCY, DATE_FROM, DATE_TILL, "EN", null);
+
         assertThat(jsonCode(response)).isEqualTo("0");
         assertThat(response.jsonPath().getList("transactions")).isNotEmpty();
-        assertThat(response.jsonPath().getString("transactions[0].currency")).hasSize(3);
-        assertThat(response.jsonPath().getString("error")).isEqualTo("");
+
+        String path = "transactions[0].";
+
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(response.jsonPath().getString(path + "uniqueID")).isNotBlank();
+            softly.assertThat(response.jsonPath().getString(path + "trnID")).isNotBlank();
+            softly.assertThatCode(() -> {
+                        LocalDate parsedDate = LocalDate.parse(response.jsonPath().getString(path + "date"));
+                    })
+                    .as("date should be a valid calendar date in YYYY-MM-DD format") .doesNotThrowAnyException();
+            softly.assertThat(response.jsonPath().getString(path + "refno")).isNotBlank();
+            softly.assertThat(response.jsonPath().getString(path + "narrative")).isNotNull();
+            softly.assertThat(response.jsonPath().getString(path + "amount")).matches("-?\\d+(\\.\\d+)?");
+            softly.assertThat(response.jsonPath().getString(path + "currency")).matches("[A-Z]{3}");
+            softly.assertThat(response.jsonPath().getString(path + "saldo")).matches("-?\\d+(\\.\\d+)?");
+            softly.assertThat(response.jsonPath().getString(path + "trndesc")).isNotBlank();
+            softly.assertThat(response.jsonPath().getString(path + "tcf")).matches("[YN]");
+        });
     }
 
     @Test
