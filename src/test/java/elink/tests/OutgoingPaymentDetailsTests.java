@@ -16,9 +16,13 @@ public class OutgoingPaymentDetailsTests extends BaseApiTest {
     private final Logger LOGGER = LogManager.getLogger(this.getClass());
     private static String refno;
 
+    private static final String CCY = "EUR";
+    private static final String DATE_FROM = "2026-09-01";
+    private static final String DATE_TILL = "2026-09-26";
+
     @BeforeAll
     static void fetchRefnoFromTransaction() {
-        Response transactionsResponse = elinkClientRequester.transactions(TestConfig.get("ticket.active"), null, "2026-09-01", "2026-09-26", "EN", null);
+        Response transactionsResponse = elinkClientRequester.transactions(TestConfig.get("ticket.active"), CCY, DATE_FROM, DATE_TILL, "EN", null);
         refno = transactionsResponse.jsonPath().getString("transactions[0].refno");
     }
 
