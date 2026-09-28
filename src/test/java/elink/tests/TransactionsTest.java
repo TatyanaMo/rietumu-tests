@@ -92,7 +92,7 @@ public class TransactionsTest extends BaseApiTest {
     void transactionsCheckForMissingDateFrom() {
         LOGGER.info("This test check negative scenario for 'Transactions' function when 'date from' missed");
         Response response = elinkClientRequester.transactions(
-                TestConfig.get("ticket.active"), CCY, null, DATE_TILL, "EN", null);
+                TestConfig.get("ticket.active"), CCY, "", DATE_TILL, "EN", null);
         assertThat(jsonCode(response)).isEqualTo("4");
         assertThat(response.jsonPath().getString("error")).isEqualTo("dateFrom");
     }
@@ -101,7 +101,7 @@ public class TransactionsTest extends BaseApiTest {
     void transactionsCheckForMissingDateTill() {
         LOGGER.info("This test check negative scenario for 'Transactions' function when 'date till' missed");
         Response response = elinkClientRequester.transactions(
-                TestConfig.get("ticket.active"), CCY, DATE_FROM, null, "EN", null);
+                TestConfig.get("ticket.active"), CCY, DATE_FROM, "", "EN", null);
         assertThat(jsonCode(response)).isEqualTo("4");
         assertThat(response.jsonPath().getString("error")).isEqualTo("dateTill");
     }
