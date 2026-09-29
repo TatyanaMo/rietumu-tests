@@ -53,7 +53,7 @@ public class GetDocumentForSignTests extends BaseApiTest {
     @Test
     void getDocumentForSignCheckForOmittedLanguage() {
         LOGGER.info("This test check successful response for 'GetDocumentForSign' function when language not added");
-        Response response = elinkProClientRequester.getDocumentForSign(TestConfig.get("ticket.active"), "XXX", refNo);
+        Response response = elinkProClientRequester.getDocumentForSign(TestConfig.get("ticket.active"), null, refNo);
 
         assertThat(response.jsonPath().getString("code")).isEqualTo("0");
         assertThat(response.jsonPath().getList("signatureRequired", String.class)).contains("CER");
@@ -107,7 +107,7 @@ public class GetDocumentForSignTests extends BaseApiTest {
     void getDocumentForSignCheckForInactiveTicket() {
         LOGGER.info("This test check successful response for 'GetDocumentForSign' function when inactive ticket");
         Response response = elinkProClientRequester.getDocumentForSign(
-                "not-a-real-ticket-12345", "EN", refNo);
+                TestConfig.get("ticket.inactive"), "EN", refNo);
 
         assertThat(response.jsonPath().getString("code")).isEqualTo("6");
         assertThat(response.jsonPath().getString("error")).isEqualTo("Invalid or inactive ticket.");

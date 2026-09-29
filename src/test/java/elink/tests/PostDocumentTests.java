@@ -75,7 +75,7 @@ public class PostDocumentTests extends BaseApiTest {
     }
 
     @Test
-    void transactionsCheckForNotSupportiveLanguage() {
+    void postDocumentCheckForNotSupportiveLanguage() {
          /* Sandbox behavior: language is not validated against the documented set (EN/RU/LV).
          An unsupported value like LT is accepted (code 0) and returns English text (not rejected or translated).
           */
