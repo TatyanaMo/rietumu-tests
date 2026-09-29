@@ -11,7 +11,6 @@ public class HomePage {
 
     private static final By ACCEPT_COOKIE_BTN = By.xpath(".//a[contains(@class, 'avia-cookie-consent-button') and normalize-space() = 'Accept all']");
     private static final By PRIVATE_NAV_LINK = By.xpath(".//a[@href = '/en/person']");
-    private static final By LENDING_NAV_LINK = By.xpath(".//a[contains(@class, 'header-nav__item') and @href = '/en/person/funding']");
     private static final By MORTGAGE_IN_LATVIA_CARD = By.xpath(".//a[contains(@class, 'card-item') and @href = '/en/person/funding/funding-latvia']");
 
 
@@ -30,21 +29,9 @@ public class HomePage {
         return this;
     }
 
-    public HomePage clickPrivate() {
+    public PrivatePage clickPrivate() {
         LOGGER.info("Clicking Private navigation link");
         baseFunc.click(PRIVATE_NAV_LINK);
-        return this;
-    }
-
-    public HomePage clickLending() {
-        LOGGER.info("Clicking Lending navigation link");
-        baseFunc.click(LENDING_NAV_LINK);
-        return this;
-    }
-
-    public FundingLatviaPage clickMortgageInLatvia() {
-        LOGGER.info("Clicking Mortgage in Latvia page");
-        baseFunc.click(MORTGAGE_IN_LATVIA_CARD);
-        return new FundingLatviaPage(baseFunc);
+        return new PrivatePage(baseFunc);
     }
 }

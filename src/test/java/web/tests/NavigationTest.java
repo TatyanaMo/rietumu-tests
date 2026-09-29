@@ -2,6 +2,7 @@ package web.tests;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import web.pages.BaseFunc;
 import web.pages.FundingLatviaPage;
@@ -27,4 +28,8 @@ public class NavigationTest {
         assertTrue(baseFunc.getCurrentUrl().endsWith("/en/person/funding/funding-latvia"), "Did not land on the Loan calculator page");
     }
 
+    @AfterEach
+    public void closeBrowser() {
+        baseFunc.closeBrowser();
+    }
 }
