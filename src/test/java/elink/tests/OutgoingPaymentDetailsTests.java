@@ -64,12 +64,29 @@ public class OutgoingPaymentDetailsTests extends BaseApiTest {
     }
 
     @Test
+    void outgoingPaymentDetailsCheckForNotSupportiveLanguage() {
+        LOGGER.info("This test check successful response for 'OutgoingPaymentDetails' function when language unsupported");
+        Response response = elinkClientRequester.outgoingPaymentDetails(
+                TestConfig.get("ticket.active"), refno, "LT");
+        assertThat(jsonCode(response)).isEqualTo("0");
+        assertThat(response.jsonPath().getString("error")).isEqualTo("");
+    }
+
+    @Test
+    void outgoingPaymentDetailsCheckForInvalidLanguage() {
+        LOGGER.info("This test check successful response for 'OutgoingPaymentDetails' function when language invalid");
+        Response response = elinkClientRequester.outgoingPaymentDetails(
+                TestConfig.get("ticket.active"), refno, "XXX");
+        assertThat(jsonCode(response)).isEqualTo("4");
+        assertThat(response.jsonPath().getString("error")).isEqualTo("language");
+    }
+
+    @Test
     void outgoingPaymentDetailsCheckForMissingTicket() {
         LOGGER.info("This test check negative scenario for 'OutgoingPaymentDetails' function when ticket missed");
         Response response = elinkClientRequester.outgoingPaymentDetails(null, refno, "EN");
         assertThat(jsonCode(response)).isEqualTo("4");
         assertThat(response.jsonPath().getString("error")).isEqualTo("ticket");
-
     }
 
     @Test
@@ -79,7 +96,6 @@ public class OutgoingPaymentDetailsTests extends BaseApiTest {
                 TestConfig.get("ticket.active"), null, "EN");
         assertThat(jsonCode(response)).isEqualTo("4");
         assertThat(response.jsonPath().getString("error")).isEqualTo("refno");
-
     }
 
     @Test
@@ -89,7 +105,6 @@ public class OutgoingPaymentDetailsTests extends BaseApiTest {
                 TestConfig.get("ticket.inactive"), refno, "EN");
         assertThat(jsonCode(response)).isEqualTo("6");
         assertThat(response.jsonPath().getString("error")).isEqualTo("Invalid or inactive ticket.");
-
     }
 
     @Test
@@ -99,7 +114,6 @@ public class OutgoingPaymentDetailsTests extends BaseApiTest {
                 "not-a-real-ticket-12345", refno, "EN");
         assertThat(jsonCode(response)).isEqualTo("6");
         assertThat(response.jsonPath().getString("error")).isEqualTo("Invalid or inactive ticket.");
-
     }
 
     @Test

@@ -40,3 +40,7 @@ bin/
 
 ### Mac OS ###
 .DS_Store
+
+### Sensitive test config - not for git ###
+src/test/resources/config.properties
+src/test/resources/certs/

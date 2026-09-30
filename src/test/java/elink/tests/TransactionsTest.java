@@ -41,7 +41,7 @@ public class TransactionsTest extends BaseApiTest {
             softly.assertThatCode(() -> {
                         LocalDate parsedDate = LocalDate.parse(response.jsonPath().getString(path + "date"));
                     })
-                    .as("date should be a valid calendar date in YYYY-MM-DD format") .doesNotThrowAnyException();
+                    .as("date should be a valid calendar date in YYYY-MM-DD format").doesNotThrowAnyException();
             softly.assertThat(response.jsonPath().getString(path + "refno")).isNotBlank();
             softly.assertThat(response.jsonPath().getString(path + "narrative")).isNotNull();
             softly.assertThat(response.jsonPath().getString(path + "amount")).matches("-?\\d+(\\.\\d+)?");
@@ -76,6 +76,30 @@ public class TransactionsTest extends BaseApiTest {
     void transactionCheckForLanguage(String language) {
         LOGGER.info("This test check successful response  for 'Transactions' function for all allowed languages");
         Response response = elinkClientRequester.transactions(TestConfig.get("ticket.active"), CCY, DATE_FROM, DATE_TILL, language, null);
+        assertThat(jsonCode(response)).isEqualTo("0");
+        assertThat(response.jsonPath().getString("error")).isEqualTo("");
+    }
+
+    @Test
+    void transactionsCheckForDateRangeValidationNotApplied() {
+         /* Sandbox behavior: dateFrom/dateTill ordering is not validated.
+         An inverted range (dateFrom after dateTill) still returns code 0 and the fixed dataset rather (not an error).
+          */
+        LOGGER.info("This test check negative scenario for 'Transactions' function when order for date period incorrect");
+        Response response = elinkClientRequester.transactions(
+                TestConfig.get("ticket.active"), CCY, DATE_TILL, DATE_FROM, "EN", null);
+        assertThat(jsonCode(response)).isEqualTo("0");
+        assertThat(response.jsonPath().getString("error")).isEqualTo("");
+    }
+
+    @Test
+    void transactionsCheckForForNotSupportiveLanguage() {
+         /* Sandbox behavior: language is not validated against the documented set (EN/RU/LV).
+         An unsupported value like LT is accepted (code 0) and returns English text (not rejected or translated).
+          */
+        LOGGER.info("This test check negative scenario for 'Transactions' function when language unsupported");
+        Response response = elinkClientRequester.transactions(
+                TestConfig.get("ticket.active"), CCY, DATE_FROM, DATE_TILL, "LT", null);
         assertThat(jsonCode(response)).isEqualTo("0");
         assertThat(response.jsonPath().getString("error")).isEqualTo("");
     }
@@ -143,27 +167,12 @@ public class TransactionsTest extends BaseApiTest {
     }
 
     @Test
-    void transactionsCheckForDateRangeValidationNotApplied() {
-         /* Sandbox behavior: dateFrom/dateTill ordering is not validated.
-         An inverted range (dateFrom after dateTill) still returns code 0 and the fixed dataset rather (not an error).
-          */
-        LOGGER.info("This test check negative scenario for 'Transactions' function when order for date period incorrect");
+    void transactionsCheckForForInvalidLanguage() {
+        LOGGER.info("This test check negative scenario for 'Transactions' function when language invalid");
         Response response = elinkClientRequester.transactions(
-                TestConfig.get("ticket.active"), CCY, DATE_TILL, DATE_FROM, "EN", null);
-        assertThat(jsonCode(response)).isEqualTo("0");
-        assertThat(response.jsonPath().getString("error")).isEqualTo("");
-    }
-
-    @Test
-    void transactionsCheckForLanguageValidationNotApplied() {
-         /* Sandbox behavior: language is not validated against the documented set (EN/RU/LV).
-         An unsupported value like LT is accepted (code 0) and returns English text (not rejected or translated).
-          */
-        LOGGER.info("This test check negative scenario for 'Transactions' function when language unsupported");
-        Response response = elinkClientRequester.transactions(
-                TestConfig.get("ticket.active"), CCY, DATE_FROM, DATE_TILL, "LT", null);
-        assertThat(jsonCode(response)).isEqualTo("0");
-        assertThat(response.jsonPath().getString("error")).isEqualTo("");
+                TestConfig.get("ticket.active"), CCY, DATE_FROM, DATE_TILL, "XXX", null);
+        assertThat(jsonCode(response)).isEqualTo("4");
+        assertThat(response.jsonPath().getString("error")).isEqualTo("language");
     }
 }
 

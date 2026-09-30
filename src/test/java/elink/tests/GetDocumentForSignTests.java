@@ -75,6 +75,20 @@ public class GetDocumentForSignTests extends BaseApiTest {
     }
 
     @Test
+    void getDocumentForSignCheckForNotSupportiveLanguage() {
+        LOGGER.info("This test check successful response for 'GetDocumentForSign' function when language not supported");
+        Response response = elinkProClientRequester.getDocumentForSign(
+                TestConfig.get("ticket.active"), "LT", refNo);
+
+        assertThat(response.jsonPath().getString("code")).isEqualTo("0");
+        assertThat(response.jsonPath().getList("signatureRequired", String.class)).contains("CER");
+        assertThat(response.jsonPath().getString("doc")).contains("<RBdocument");
+        assertThat(response.jsonPath().getString("doc")).contains(refNo);
+        assertThat(response.jsonPath().getString("status")).isEqualTo("20");
+        assertThat(response.jsonPath().getString("state")).isEqualTo("Waiting for signature");
+    }
+
+    @Test
     void getDocumentForSignCheckForInvalidRefNo() {
         LOGGER.info("This test check successful response for 'GetDocumentForSign' function when invalid refNo");
         Response response = elinkProClientRequester.getDocumentForSign(
