@@ -228,9 +228,9 @@ public class LoanCalculatorTests {
     void loanCalculatorCheckForMonthMaxLength() {
         LOGGER.info("Verify the month field does not accept more than 2 characters");
 
-        fundingLatviaPage.setYears(MONTHS_MORE_THAN_MAX_LENGTH);
+        fundingLatviaPage.setMonths(MONTHS_MORE_THAN_MAX_LENGTH);
 
-        assertEquals(EXPECTED_MONTH_MAX_LENGTH, fundingLatviaPage.getYearsFieldValue().length());
+        assertEquals(EXPECTED_MONTH_MAX_LENGTH, fundingLatviaPage.getMonthsFieldValue().length());
     }
 
     @AfterEach
