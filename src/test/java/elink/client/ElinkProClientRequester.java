@@ -34,12 +34,12 @@ public class ElinkProClientRequester {
     }
 
     public Response postDocument(String ticket, String language, String doc) {
-        RequestSpecification req = given().config(sslConfig)
+        RequestSpecification request = given().config(sslConfig)
                 .formParam("function", "PostDocument");
-        if (ticket != null) req.formParam("ticket", ticket);
-        if (language != null) req.formParam("language", language);
-        if (doc != null) req.formParam("doc", doc);
-        return req.post(baseUrl);
+        if (ticket != null) request.formParam("ticket", ticket);
+        if (language != null) request.formParam("language", language);
+        if (doc != null) request.formParam("doc", doc);
+        return request.post(baseUrl);
     }
 
     public Response getDocumentForSign(String ticket, String language, String refNo) {
