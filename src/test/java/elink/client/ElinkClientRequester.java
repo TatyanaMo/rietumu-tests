@@ -17,7 +17,7 @@ public class ElinkClientRequester {
         this.password = TestConfig.get("elinkPassword");
     }
 
-    public Response transactions(String ticket, String ccy, String dateFrom, String dateTill, String language, String trnlID) {
+    public Response transactions(String ticket, String ccy, String dateFrom, String dateTill, String language, String trnID) {
         RequestSpecification request = given()
                 .auth().preemptive().basic(login, password)
                 .formParam("function", "Transactions")
@@ -28,7 +28,7 @@ public class ElinkClientRequester {
         if (dateFrom != null) request.formParam("dateFrom", dateFrom);
         if (dateTill != null) request.formParam("dateTill", dateTill);
         if (language != null) request.formParam("language", language);
-        if (trnlID != null) request.formParam("trnID", trnlID);
+        if (trnID != null) request.formParam("trnID", trnID);
 
         return request.post(baseUrl);
     }
